@@ -74,10 +74,71 @@ Tipos de dispositivos MFA:
 
 ## 25. Utilizando o STS
 
-O **AWS STS (Security Token Service)** permite criar credenciais temporárias com duração configurável.
+O **AWS STS (Security Token Service)** é um serviço que permite criar **credenciais temporárias** para acessar recursos da AWS. Essas credenciais funcionam como se fossem chaves de acesso normais, mas com **tempo de vida limitado**.
 
-- Usado para usuários federados ou delegação de acesso entre contas
-- Exemplo: `assume-role`, `get-session-token`, `assume-role-with-saml`
+### 🔐 Quando usar o STS?
+
+| Situação | Exemplo |
+|----------|---------|
+| Delegar acesso entre contas AWS | Conta A cria uma role que a conta B pode assumir |
+| Acesso federado (AD, SAML, Google) | Usuário externo assume uma role na AWS |
+| Aplicação externa/móvel acessa a AWS | Token temporário gerado para acesso controlado |
+| MFA exigido para uma sessão temporária | Geração com `GetSessionToken` |
+
+---
+
+### 🧪 Principais operações do STS
+
+#### 1. `AssumeRole`
+Permite que uma entidade (usuário, serviço) **assuma temporariamente uma role**.
+
+```bash
+aws sts assume-role \
+  --role-arn arn:aws:iam::123456789012:role/RoleAcessoS3 \
+  --role-session-name SessaoTeste
+```
+
+Retorna um bloco de credenciais temporárias que podem ser usadas em `aws configure`.
+
+#### 2. `AssumeRoleWithSAML`
+Usado para **acesso federado** com provedores SAML (como ADFS, Google Workspace, etc.).
+
+#### 3. `GetSessionToken`
+Gera credenciais temporárias para um usuário IAM **autenticado via MFA**.
+
+```bash
+aws sts get-session-token \
+  --serial-number arn:aws:iam::123456789012:mfa/luiz \
+  --token-code 123456
+```
+
+#### 4. `GetFederationToken`
+Gera um token temporário para um **usuário não IAM**, útil para aplicações web/mobile externas.
+
+---
+
+### 📦 Exemplo real (Cross-account Access com STS)
+
+1. Na **Conta A**, crie uma role com política de confiança (`trust policy`) permitindo ser assumida por Conta B.
+2. Na **Conta B**, chame `assume-role`.
+3. Use as credenciais retornadas para acessar, por exemplo, um bucket S3 da Conta A.
+
+---
+
+### 🛡️ Boas práticas com STS
+
+- Limite a duração da sessão (padrão: 1h, máximo: 12h)
+- Combine com MFA para maior segurança
+- Nunca use STS para substituir roles permanentes em serviços internos
+
+---
+
+### 🎯 Dicas para a prova
+
+- Acesso entre contas → `AssumeRole`
+- MFA + sessão temporária → `GetSessionToken`
+- Login com SAML (AD/Google) → `AssumeRoleWithSAML`
+- Usuário externo temporário → `GetFederationToken`
 
 ---
 
