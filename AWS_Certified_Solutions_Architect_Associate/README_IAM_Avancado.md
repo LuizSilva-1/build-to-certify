@@ -153,9 +153,81 @@ A AWS permite definir políticas de senha como:
 
 ## 27. Políticas de Recurso e Identidade
 
-- **Identity-Based Policies (IBP)**: Ligadas a usuários, grupos e roles
-- **Resource-Based Policies (RBP)**: Ligadas a recursos como S3, Lambda, etc.
-- Importante para controle de acesso entre contas (cross-account access)
+Na AWS, o controle de permissões é feito com **políticas (policies)** escritas em JSON. Essas políticas podem ser aplicadas tanto à **identidade (usuário, grupo ou role)** quanto ao **recurso (como um bucket S3)**.
+
+---
+
+### 🔷 Identity-Based Policy (IBP)
+
+São políticas **anexadas diretamente a identidades IAM**: usuários, grupos ou roles. Elas definem **o que a identidade pode fazer**.
+
+#### 📌 Exemplos:
+- Um usuário IAM pode listar buckets no S3 (`s3:ListBucket`)
+- Um grupo de desenvolvedores pode iniciar e parar instâncias EC2 (`ec2:StartInstances`, `ec2:StopInstances`)
+- Uma role de aplicação pode acessar o DynamoDB
+
+#### ✅ Tipos de IBP:
+- **Inline**: Associada diretamente a **um único usuário, grupo ou role** (1-para-1)
+- **Gerenciadas pela AWS (AWS Managed)**: Criadas e mantidas pela AWS
+- **Gerenciadas pelo Cliente (Customer Managed)**: Criadas por você e reutilizáveis
+
+---
+
+### 🔷 Resource-Based Policy (RBP)
+
+São políticas **anexadas diretamente ao recurso**, e definem **quem pode acessá-lo** e **com quais permissões**.
+
+#### 📌 Exemplos:
+- Um bucket S3 permite que uma role de outra conta leia arquivos
+- Uma função Lambda permite ser invocada por um serviço externo
+- Um tópico SNS pode ser publicado por um serviço específico
+
+#### ✅ Características:
+- Incluem o campo `"Principal"` (quem está acessando)
+- Suportam **acesso entre contas (cross-account)**
+- Exemplo comum: políticas de bucket no S3
+
+---
+
+### 🔁 Comparando IBP vs RBP
+
+| Característica           | Identity-Based Policy (IBP)         | Resource-Based Policy (RBP)       |
+|--------------------------|-------------------------------------|-----------------------------------|
+| Aplicada a               | Usuário, Grupo, Role                | Recurso (S3, Lambda, SNS, etc.)   |
+| Campo "Principal"        | ❌ Não                               | ✅ Sim                            |
+| Suporte a acesso entre contas | ⚠️ Via role                        | ✅ Direto                         |
+| Reutilização             | Customer managed                    | Geralmente recurso a recurso     |
+| Exemplo                  | Permitir que `userX` faça upload no S3 | Permitir que outra conta acesse meu bucket |
+
+---
+
+### 🧠 Visual explicado da imagem
+
+Na imagem enviada:
+
+- **Usuário** pode ter políticas **inline** diretamente aplicadas (1 para 1)
+- **Grupo** tem políticas AWS Managed ou Customer Managed, aplicadas a vários usuários ao mesmo tempo
+- **Role** pode ser assumida por usuários, aplicações ou serviços
+- **Recursos (ex: S3, EC2)** possuem **políticas baseadas em recurso (RBP)** para controlar o acesso
+
+---
+
+### 💡 Boas práticas:
+
+- Prefira **Customer Managed Policies reutilizáveis**
+- Evite usar muitas **Inline Policies**, pois são difíceis de auditar e reutilizar
+- Use **RBP quando quiser conceder acesso a recursos para outras contas**
+- Aplique **políticas de menor privilégio possível**
+- Utilize ferramentas como **IAM Policy Simulator** e **Access Analyzer** para validar acessos
+
+---
+
+### 🎯 Na prova:
+
+- Se a pergunta fala sobre "quem pode acessar o recurso" → **RBP**
+- Se fala sobre "o que a identidade pode fazer" → **IBP**
+- Se envolve "outra conta acessando minha AWS" → **RBP com cross-account**
+
 
 ---
 
