@@ -6,7 +6,7 @@ Este diretório contém anotações, laboratórios práticos e progresso da minh
 
 ---
 
-## 💡 O que você aprenderá
+## 💡 O que irei aprender
 
 - ✅ Projetar **sistemas seguros, confiáveis, de alto desempenho e econômicos**
 - ✅ Executar **migração de aplicações** ou desenhar novas soluções para a nuvem
